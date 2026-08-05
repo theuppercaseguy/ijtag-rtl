@@ -170,7 +170,7 @@ we do this so we can open SIB-5 and SIB-6 withought going through SIB 1, 2, 4 TD
 
 ---
 
-### Complete IJTAG Scan
+### Writing 'HFFF_FFFF to All TDR's
 
 <p align="center">
 <img src="images/programming_all_tdrs.png" width="900">
