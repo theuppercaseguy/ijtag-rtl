@@ -148,7 +148,7 @@ run -all
 ### Loading IJTAG_Network Instruction 
 
 <p align="center">
-<img src="images/all_sibs_programmed" width="900">
+<img src="images/loading_ijtag_instr.png" width="900">
 </p>
 
 ---
