@@ -9,7 +9,7 @@
 Synthesizable IEEE 1687 (IJTAG) RTL implementation in SystemVerilog featuring a hierarchical SIB network, reusable Test Data Registers (TDRs), and a complete simulation environment.
 
 > This project builds upon my standalone IEEE 1149.1 JTAG implementation.  
-> **JTAG Repository:** https://github.com/theuppercaseguy/JTAG-IEEE-1149.1-RTL/<jtag_repo>
+> **JTAG Repository:** https://github.com/theuppercaseguy/JTAG-IEEE-1149.1-RTL
 
 ---
 
