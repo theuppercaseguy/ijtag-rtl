@@ -157,7 +157,7 @@ run -all
 we do this so we can open SIB-5 and SIB-6 withought going through SIB 1, 2, 4 TDR's. Essentially saving (8*3) 24 clks. 
 
 <p align="center">
-<img src="images/loading_ijtag_instr.png" width="900">
+<img src="images/opening_sib_3.png" width="900">
 </p>
 
 ---
@@ -165,7 +165,7 @@ we do this so we can open SIB-5 and SIB-6 withought going through SIB 1, 2, 4 TD
 ### Programing all SIB's to Open
 
 <p align="center">
-<img src="images/opening_sib_3.png" width="900">
+<img src="images/all_sibs_programmed.png" width="900">
 </p>
 
 ---
