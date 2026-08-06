@@ -60,7 +60,8 @@ module bsc(
 
 	// Update register
 	// Latches captured/shifted value during UpdateDR
-	always_ff @(posedge update_dr)
+	always_ff @(negedge tclk)
+	if(update_dr)
 		update_ff_out <= capture_ff_out;
 
 	// MUX B:
