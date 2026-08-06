@@ -100,7 +100,7 @@ module TDR import jtag_package::*;
 	logic bsr_capture_dr, bsr_update_dr, bsr_shift_dr;	// Enable Boundary Scan control signals only when BSR is selected
 
 	assign bsr_capture_dr = (tdr_selected == TDR_BSR) ?  capture_dr_en  : 1'b0;
-	assign bsr_shift_dr   = ~tclk & shift_dr_en;
+	assign bsr_shift_dr   = /*~tclk & */shift_dr_en;
 	assign bsr_update_dr  = update_dr_en;
 
 	/*
