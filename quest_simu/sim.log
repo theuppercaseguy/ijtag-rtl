@@ -1,11 +1,11 @@
 # vsim -l sim.log -wlf sim.wlf ijtag_tb_opt 
-# Start time: 14:11:36 on Aug 06,2026
+# Start time: 14:20:23 on Aug 06,2026
 # Loading sv_std.std
 # Loading work.jtag_package(fast)
 # Loading work.jtag_defines_svh_unit(fast)
 # Loading work.ijtag_tb_top(fast)
 # Loading work.jtag_inf(fast__1)
-# Loading work.IJTAG_top(fast)
+# Loading work.ijtag_top(fast)
 # Loading work.TAP_FSM(fast)
 # Loading work.instr_shift_reg(fast)
 # Loading work.instr_decoder(fast)
@@ -34,5 +34,5 @@
 #     (procedure "run" line 107)
 #     invoked from within
 # "run -all"
-# End time: 14:12:01 on Aug 06,2026, Elapsed time: 0:00:25
+# End time: 14:20:35 on Aug 06,2026, Elapsed time: 0:00:12
 # Errors: 1, Warnings: 0

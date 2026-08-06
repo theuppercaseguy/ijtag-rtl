@@ -14,165 +14,84 @@
 //==============================================================================
 
 
+//==============================================================================
+// Package     : jtag_package
+// Standard    : IEEE Std 1149.1
+//
+// Description:
+//   Global package containing all common definitions used throughout the JTAG
+//   implementation. Defines the IEEE 1149.1 TAP state encoding, supported JTAG
+//   instructions, Test Data Register (TDR) selections, default register values,
+//   and project-wide configuration parameters shared across all RTL modules.
+//
+// Contents:
+//   • TAP Controller state definitions
+//   • Supported JTAG instruction opcodes
+//   • Test Data Register (TDR) selection types
+//   • Shift-register control modes
+//   • Global design parameters (IR width, BSR width, IDCODE, etc.)
+//==============================================================================
+package jtag_package;
 
-//======================================================================
-// Project Configuration
-//----------------------------------------------------------------------
-// Set to 1 to directly connect core inputs to outputs, bypassing any
-// user logic. Useful for testing the Boundary Scan Register (BSR)
-// without requiring a functional DUT.
-//======================================================================
-`ifndef BRIDGE_CORE
-`define BRIDGE_CORE 1
-`endif
+	// IEEE 1149.1 TAP Controller 16-state finite-state machine
+	typedef enum logic [3:0] {
+	    EXIT2_DR    = 4'h0,
+	    EXIT1_DR    = 4'h1,
+	    SHIFT_DR    = 4'h2,
+	    PAUSE_DR    = 4'h3,
+	    SEL_SCAN_IR = 4'h4,
+	    UPDATE_DR   = 4'h5,
+	    CAP_DR      = 4'h6,
+	    SEL_SCAN_DR = 4'h7,
+	    EXIT2_IR    = 4'h8,
+	    EXIT1_IR    = 4'h9,
+	    SHIFT_IR    = 4'hA,
+	    PAUSE_IR    = 4'hB,
+	    RUN_IDLE    = 4'hC,
+	    UPDATE_IR   = 4'hD,
+	    CAP_IR      = 4'hE,
+	    RST         = 4'hF
+	} tap_state_t;
 
-//======================================================================
-// JTAG Core Configuration
-//----------------------------------------------------------------------
-// Configurable parameters defining the size of the Boundary Scan
-// Register (BSR), Instruction Register (IR), and standard JTAG
-// instruction opcodes.
-//======================================================================
+	// Generic operating modes used by reusable shift-register modules
+	typedef enum {DISABLE, SER_IN, PAR_IN} shift_reg_state_t;
 
-// Number of Boundary Scan Cells (BSCs) connected to DUT inputs
-`ifndef CORE_IN_PORTS
-`define CORE_IN_PORTS 4
-`endif
+	parameter CORE_IN_PORTS  = `CORE_IN_PORTS;
+	parameter CORE_OUT_PORTS = `CORE_OUT_PORTS;
+	// Boundary Scan Register width = total number of boundary scan cells
+	parameter BSC_COUNT = (CORE_IN_PORTS + CORE_OUT_PORTS);
 
-// Number of Boundary Scan Cells (BSCs) connected to DUT outputs
-`ifndef CORE_OUT_PORTS
-`define CORE_OUT_PORTS 4
-`endif
+	// Instruction Register width
+	parameter IR_WIDTH = `IR_WIDTH;
 
-// Width of the JTAG Instruction Register (IR)
-`ifndef IR_WIDTH
-`define IR_WIDTH 32
-`endif
+	// IDCODE register width (typically 32 bits per IEEE 1149.1)
+	parameter IDCODE_WIDTH = `IDCODE_WIDTH;
 
-// Width of the IEEE 1149.1 IDCODE Register (fixed to 32 bits)
-`ifndef IDCODE_WIDTH
-`define IDCODE_WIDTH 32
-`endif
+	// Hardwired IEEE IDCODE register value:
+	// Version[31:28] | Part Number[27:12] | Manufacturer[11:1] | 1'b1
+	parameter ID_CODE_REG_DEF_VAL = `ID_CODE_REG_DEF_VAL;
 
-// Default value loaded into the Device Identification Register
-`ifndef ID_CODE_REG_DEF_VAL
-`define ID_CODE_REG_DEF_VAL 65450
-`endif
+	// Supported IEEE 1149.1 instructions
+	typedef enum logic [IR_WIDTH-1:0]{
+		INTEST   	= `INTEST,
+		IDCODE   	= `IDCODE,
+		RUNBIST  	= `RUNBIST,
+		SAMPLE   	= `SAMPLE,
+		EXTEST   	= `EXTEST,
+		PRELOAD  	= `PRELOAD,
+		CLAMP    	= `CLAMP,
+		HIGHZ    	= `HIGHZ,
+		IJTAG_INST  = `IJTAG_INST,
+		BYPASS   	= {IR_WIDTH{1'b1}}    // Mandatory IEEE BYPASS opcode
+	} instructions_t;
 
-//======================================================================
-// IEEE 1149.1 Instruction Opcodes
-//----------------------------------------------------------------------
-// Binary values decoded by the Instruction Register to select the
-// active Test Data Register (TDR) or execute a JTAG operation.
-//======================================================================
+	// IR reset value after Test-Logic-Reset (device defaults to IDCODE)
+	parameter IR_DEFAULT_RST_VALUE = {{(IR_WIDTH-1){1'b0}},1'b1};
 
-// Connect Boundary Scan Register between TDI and TDO for internal testing
-`ifndef INTEST
-`define INTEST 7
-`endif
+	// Bridge mode: directly connects core input to core output when enabled
+	parameter BRIDGE_CORE = `BRIDGE_CORE;
 
-// Select the 32-bit Device Identification Register
-`ifndef IDCODE
-`define IDCODE 10
-`endif
+	// Available Test Data Registers selectable by the Instruction Register
+	typedef enum {TDR_BSR, TDR_IDCODE, TDR_BYPASS, TDR_RUNBIST, IJTAG_NETWORK} tdr_avlbl_t;
 
-// Execute the device's Built-In Self-Test (BIST)
-`ifndef RUNBIST
-`define RUNBIST 8
-`endif
-
-// Capture system data into the Boundary Scan Register without affecting operation
-`ifndef SAMPLE
-`define SAMPLE 4
-`endif
-
-// Drive device pins using Boundary Scan Register contents
-`ifndef EXTEST
-`define EXTEST 6
-`endif
-
-// Load Boundary Scan Register values without updating device pins
-`ifndef PRELOAD
-`define PRELOAD 5
-`endif
-
-// Force output pins to previously loaded Boundary Scan Register values
-`ifndef CLAMP
-`define CLAMP 9
-`endif
-
-// Place all output pins into the high-impedance state
-`ifndef HIGHZ
-`define HIGHZ 'hD
-`endif
-
-// Select the IEEE 1687 (IJTAG) network as the active data register
-`ifndef IJTAG_INST
-`define IJTAG_INST 'hE
-`endif
-
-// define by IEEE as alll 1's
-// `ifndef BYPASS
-// `define BYPASS 'hffff
-// `endif
-
-
-//======================================================================
-// Test Data Register (TDR) Width Configuration
-//----------------------------------------------------------------------
-// Defines the width (in bits) of each IJTAG Test Data Register.
-// Each TDR can be configured independently.
-//======================================================================
-`ifndef TDR1_WIDTH
-`define TDR1_WIDTH 8
-`endif
-
-`ifndef TDR2_WIDTH
-`define TDR2_WIDTH 8
-`endif
-
-`ifndef TDR3_WIDTH
-`define TDR3_WIDTH 8
-`endif
-
-`ifndef TDR4_WIDTH
-`define TDR4_WIDTH 8
-`endif
-
-`ifndef TDR5_WIDTH
-`define TDR5_WIDTH 8
-`endif
-
-
-//======================================================================
-// Test Data Register (TDR) Reset Values
-//----------------------------------------------------------------------
-// Default values loaded into each TDR during Capture-DR (or reset,
-// depending on implementation). These values represent the initial
-// contents of each instrument register.
-//======================================================================
-`ifndef TDR1_RST_VAL
-// `define TDR2_RST_VAL `TDR2_WIDTH'b0000_0000
-`define TDR1_RST_VAL {`TDR1_WIDTH{1'b0}}
-`endif
-
-`ifndef TDR2_RST_VAL
-// `define TDR2_RST_VAL `TDR2_WIDTH'b0000_0000
-`define TDR2_RST_VAL {`TDR2_WIDTH{1'b0}}
-`endif
-
-`ifndef TDR3_RST_VAL
-// `define TDR3_RST_VAL `TDR3_WIDTH'b0000_0000
-`define TDR3_RST_VAL {`TDR3_WIDTH{1'b0}}
-`endif
-
-`ifndef TDR4_RST_VAL
-// `define TDR4_RST_VAL `TDR4_WIDTH'b0000_0000
-`define TDR4_RST_VAL {`TDR4_WIDTH{1'b0}}
-`endif
-
-`ifndef TDR5_RST_VAL
-// `define TDR5_RST_VAL `TDR5_WIDTH'b0000_0000
-`define TDR5_RST_VAL {`TDR5_WIDTH{1'b0}}
-`endif
-
+endpackage : jtag_package

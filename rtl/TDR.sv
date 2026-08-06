@@ -46,8 +46,8 @@ module TDR import jtag_package::*;
   input tdi,
 
   input logic shift_dr_en, capture_dr_en, update_dr_en,
-    input logic mode,
-    input tdr_avlbl_t tdr_selected,
+  input logic mode,
+  input tdr_avlbl_t tdr_selected,
 
   input logic [CORE_IN_PORTS-1:0]  io_in,          // External input pins
   input logic [CORE_IN_PORTS-1:0]  io_logic_out,   // Core outputs

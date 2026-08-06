@@ -21,7 +21,7 @@ module ijtag_tb_top;
 
 	jtag_inf jtag_intf(clk);
 
-	IJTAG_top ijtag_top_inst(
+	ijtag_top ijtag_top_inst(
 		.inf(jtag_intf)
 	);
 

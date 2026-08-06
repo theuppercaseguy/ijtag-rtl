@@ -1,11 +1,11 @@
 BEGIN 3:jtag_inf:fast__1:work
-    tdi :  1:ijtag_tb_top:fast:work 1:IJTAG_top:fast:work
-    io_logic_out :  1:IJTAG_top:fast:work
-    io_out :  1:IJTAG_top:fast:work
-    trst :  1:ijtag_tb_top:fast:work 1:IJTAG_top:fast:work
-    tms :  1:ijtag_tb_top:fast:work 1:IJTAG_top:fast:work
-    io_in :  1:IJTAG_top:fast:work
-    io_logic_in :  1:IJTAG_top:fast:work
-    tdo :  1:IJTAG_top:fast:work
-    tclk :  1:IJTAG_top:fast:work
+    tdi :  1:ijtag_tb_top:fast:work 1:ijtag_top:fast:work
+    io_logic_out :  1:ijtag_top:fast:work
+    io_out :  1:ijtag_top:fast:work
+    trst :  1:ijtag_tb_top:fast:work 1:ijtag_top:fast:work
+    tms :  1:ijtag_tb_top:fast:work 1:ijtag_top:fast:work
+    io_in :  1:ijtag_top:fast:work
+    io_logic_in :  1:ijtag_top:fast:work
+    tdo :  1:ijtag_top:fast:work
+    tclk :  1:ijtag_top:fast:work
 END 
