@@ -41,158 +41,158 @@ module TDR import jtag_package::*;
      parameter BSC_COUNT     = 4,
      parameter IDCODE_WIDTH  = 4
   )(
-	input tclk,
-	input trst,
-	input tdi,
+  input tclk,
+  input trst,
+  input tdi,
 
-	input logic shift_dr_en, capture_dr_en, update_dr_en,
+  input logic shift_dr_en, capture_dr_en, update_dr_en,
     input logic mode,
     input tdr_avlbl_t tdr_selected,
 
-	input logic [CORE_IN_PORTS-1:0]  io_in,          // External input pins
-	input logic [CORE_IN_PORTS-1:0]  io_logic_out,   // Core outputs
+  input logic [CORE_IN_PORTS-1:0]  io_in,          // External input pins
+  input logic [CORE_IN_PORTS-1:0]  io_logic_out,   // Core outputs
 
-	output logic [CORE_IN_PORTS-1:0]  io_logic_in,   // Input BSC outputs to core
-	output logic [CORE_OUT_PORTS-1:0] io_out,        // Output BSC outputs to pins
-	output logic tdo
+  output logic [CORE_IN_PORTS-1:0]  io_logic_in,   // Input BSC outputs to core
+  output logic [CORE_OUT_PORTS-1:0] io_out,        // Output BSC outputs to pins
+  output logic tdo
 );
 
-	//--------------------------------------------------------------------------
-	// BYPASS Register (1-bit)
-	// Captures logic 0 during Capture-DR and shifts serial data during Shift-DR.
-	//--------------------------------------------------------------------------
-	logic bypass_reg;
-	always_ff @(posedge tclk)
-	begin
-		if(capture_dr_en)
-			bypass_reg <= 0;
-		if(shift_dr_en)
-			bypass_reg <= tdi;
-	end
+  //--------------------------------------------------------------------------
+  // BYPASS Register (1-bit)
+  // Captures logic 0 during Capture-DR and shifts serial data during Shift-DR.
+  //--------------------------------------------------------------------------
+  logic bypass_reg;
+  always_ff @(posedge tclk)
+  begin
+    if(capture_dr_en)
+      bypass_reg <= 0;
+    if(shift_dr_en)
+      bypass_reg <= tdi;
+  end
 
-	//--------------------------------------------------------------------------
-	// IDCODE Register
-	// Parallel-loads the fixed IEEE IDCODE during Capture-DR and shifts it
-	// serially during Shift-DR.
-	//--------------------------------------------------------------------------
-	logic [IDCODE_WIDTH-1:0] id_code_par_out;
-	logic                    id_code_ser_out;
+  //--------------------------------------------------------------------------
+  // IDCODE Register
+  // Parallel-loads the fixed IEEE IDCODE during Capture-DR and shifts it
+  // serially during Shift-DR.
+  //--------------------------------------------------------------------------
+  logic [IDCODE_WIDTH-1:0] id_code_par_out;
+  logic                    id_code_ser_out;
 
-	shift_register #(.WIDTH(IDCODE_WIDTH))
-	shift_idcode_reg(
-		.clk     (tclk),
-		.rst_n   (trst),
-		.state   (capture_dr_en ? PAR_IN :
-				 (shift_dr_en   ? SER_IN : DISABLE)),
-		.ser_in  (tdi),
-		.par_in  (ID_CODE_REG_DEF_VAL),
+  shift_register #(.WIDTH(IDCODE_WIDTH))
+  shift_idcode_reg(
+    .clk     (tclk),
+    .rst_n   (trst),
+    .state   (capture_dr_en ? PAR_IN :
+         (shift_dr_en   ? SER_IN : DISABLE)),
+    .ser_in  (tdi),
+    .par_in  (ID_CODE_REG_DEF_VAL),
 
-		.ser_out (id_code_ser_out),
-		.par_out (id_code_par_out)
-	);
+    .ser_out (id_code_ser_out),
+    .par_out (id_code_par_out)
+  );
 
 
-	//--------------------------------------------------------------------------
-	// Boundary Scan Register (BSR)
-	//--------------------------------------------------------------------------
-	genvar i;
-	logic [BSC_COUNT-1:0] bsc_chain;     // Complete BSR scan chain
-	logic bsr_capture_dr, bsr_update_dr, bsr_shift_dr;	// Enable Boundary Scan control signals only when BSR is selected
+  //--------------------------------------------------------------------------
+  // Boundary Scan Register (BSR)
+  //--------------------------------------------------------------------------
+  genvar i;
+  logic [BSC_COUNT-1:0] bsc_chain;     // Complete BSR scan chain
+  logic bsr_capture_dr, bsr_update_dr, bsr_shift_dr;  // Enable Boundary Scan control signals only when BSR is selected
 
-	assign bsr_capture_dr = (tdr_selected == TDR_BSR) ?  capture_dr_en  : 1'b0;
-	assign bsr_shift_dr   = /*~tclk & */shift_dr_en;
-	assign bsr_update_dr  = update_dr_en;
+  assign bsr_capture_dr = (tdr_selected == TDR_BSR) ?  capture_dr_en  : 1'b0;
+  assign bsr_shift_dr   = /*~tclk & */shift_dr_en;
+  assign bsr_update_dr  = update_dr_en;
 
-	/*
+  /*
                                INPUT BOUNDARY SCAN CELLS                         OUTPUT BOUNDARY SCAN CELLS
 
-		    io_in[3]      io_in[2]      io_in[1]      io_in[0]      io_logic_out[3] io_logic_out[2] io_logic_out[1] io_logic_out[0]
+        io_in[3]      io_in[2]      io_in[1]      io_in[0]      io_logic_out[3] io_logic_out[2] io_logic_out[1] io_logic_out[0]
            │             │             │             │               │              │               │              │
            ▼             ▼             ▼             ▼               ▼              ▼               ▼              ▼
 TDI ──▶ [BSC7] ─────▶ [BSC6] ─────▶ [BSC5] ─────▶ [BSC4] ───────▶ [BSC3] ──────▶ [BSC2] ───────▶ [BSC1] ──────▶ [BSC0] ──▶ TDO
           │             │             │             │               │               │               │              │
           ▼             ▼             ▼             ▼               ▼               ▼               ▼              ▼
     io_logic_in[3]  io_logic_in[2] io_logic_in[1] io_logic_in[0]  io_out[3]     io_out[2]       io_out[1]       io_out[0]
-	*/
+  */
 
-	generate
+  generate
 
-		//----------------------------------------------------------------------
-		// Input-side Boundary Scan Cells
-		//
-		// Scan path:
-		//      TDI -> Input BSC[n-1] -> ... -> Input BSC[n/2]
-		//----------------------------------------------------------------------
-		for (i = 0; i < CORE_IN_PORTS; i++) begin
-			bsc bsc_in(
-				.tclk        (tclk),
+    //----------------------------------------------------------------------
+    // Input-side Boundary Scan Cells
+    //
+    // Scan path:
+    //      TDI -> Input BSC[n-1] -> ... -> Input BSC[n/2]
+    //----------------------------------------------------------------------
+    for (i = 0; i < CORE_IN_PORTS; i++) begin
+      bsc bsc_in(
+        .tclk        (tclk),
 
-				.sys_in      (io_in[CORE_IN_PORTS-1-i]),           	 	 // External input pin
-				.from_bsc_in (i == 0 ? tdi : bsc_chain[(BSC_COUNT)-i]),// Previous scan cell / TDI
+        .sys_in      (io_in[CORE_IN_PORTS-1-i]),               // External input pin
+        .from_bsc_in (i == 0 ? tdi : bsc_chain[(BSC_COUNT)-i]),// Previous scan cell / TDI
 
-				.capture_dr  (bsr_capture_dr),
-				.update_dr   (bsr_update_dr),
-				.shift_dr    (bsr_shift_dr),
+        .capture_dr  (bsr_capture_dr),
+        .update_dr   (bsr_update_dr),
+        .shift_dr    (bsr_shift_dr),
 
-				.mode_ctrl   (mode),
+        .mode_ctrl   (mode),
 
-				.sys_out     (io_logic_in[CORE_IN_PORTS-1-i]),      // Input towards core
-				.to_bsc_out  (bsc_chain[BSC_COUNT-1-i])             // Next scan cell
-			);
-		end
-
-
-		//----------------------------------------------------------------------
-		// Output-side Boundary Scan Cells
-		//
-		// Scan path:
-		//      ... -> Output BSC[n/2] -> ... -> Output BSC[0] -> TDO
-		//----------------------------------------------------------------------
-		for (i = 0; i < CORE_OUT_PORTS; i++) begin
-			bsc bsc_out(
-				.tclk        (tclk),
-
-				.sys_in      (io_logic_out[CORE_OUT_PORTS-1-i]),   // Core output
-				.from_bsc_in (i==0 ? bsc_chain[BSC_COUNT-CORE_IN_PORTS] :
-									 bsc_chain[(BSC_COUNT - CORE_IN_PORTS)-i]),  // Previous scan cell
-
-				.capture_dr  (bsr_capture_dr),
-				.update_dr   (bsr_update_dr),
-				.shift_dr    (bsr_shift_dr),
-				.mode_ctrl   (mode),
-
-				.sys_out     (io_out[CORE_OUT_PORTS-1-i]),              // External output pin
-				.to_bsc_out  (bsc_chain[(BSC_COUNT-CORE_IN_PORTS-1)-i]) // Next scan cell
-			);
-		end
-
-	endgenerate
+        .sys_out     (io_logic_in[CORE_IN_PORTS-1-i]),      // Input towards core
+        .to_bsc_out  (bsc_chain[BSC_COUNT-1-i])             // Next scan cell
+      );
+    end
 
 
-	//--------------------------------------------------------------------------
-	// TDO Multiplexer
-	// Routes the currently selected Test Data Register to the TAP serial output.
-	//--------------------------------------------------------------------------
-	always_comb
-	begin
-		case (tdr_selected)
+    //----------------------------------------------------------------------
+    // Output-side Boundary Scan Cells
+    //
+    // Scan path:
+    //      ... -> Output BSC[n/2] -> ... -> Output BSC[0] -> TDO
+    //----------------------------------------------------------------------
+    for (i = 0; i < CORE_OUT_PORTS; i++) begin
+      bsc bsc_out(
+        .tclk        (tclk),
 
-			TDR_IDCODE :
-				tdo = id_code_ser_out;
+        .sys_in      (io_logic_out[CORE_OUT_PORTS-1-i]),   // Core output
+        .from_bsc_in (i==0 ? bsc_chain[BSC_COUNT-CORE_IN_PORTS] :
+                   bsc_chain[(BSC_COUNT - CORE_IN_PORTS)-i]),  // Previous scan cell
 
-			TDR_BYPASS :
-				tdo = bypass_reg;
+        .capture_dr  (bsr_capture_dr),
+        .update_dr   (bsr_update_dr),
+        .shift_dr    (bsr_shift_dr),
+        .mode_ctrl   (mode),
 
-			TDR_BSR :
-				tdo = bsc_chain[0];   // Last Boundary Scan Cell
+        .sys_out     (io_out[CORE_OUT_PORTS-1-i]),              // External output pin
+        .to_bsc_out  (bsc_chain[(BSC_COUNT-CORE_IN_PORTS-1)-i]) // Next scan cell
+      );
+    end
 
-			TDR_RUNBIST :
-				tdo = 0;
+  endgenerate
 
-			default :
-				tdo = 0;
 
-		endcase
-	end
+  //--------------------------------------------------------------------------
+  // TDO Multiplexer
+  // Routes the currently selected Test Data Register to the TAP serial output.
+  //--------------------------------------------------------------------------
+  always_comb
+  begin
+    case (tdr_selected)
+
+      TDR_IDCODE :
+        tdo = id_code_ser_out;
+
+      TDR_BYPASS :
+        tdo = bypass_reg;
+
+      TDR_BSR :
+        tdo = bsc_chain[0];   // Last Boundary Scan Cell
+
+      TDR_RUNBIST :
+        tdo = 0;
+
+      default :
+        tdo = 0;
+
+    endcase
+  end
 
 endmodule : TDR

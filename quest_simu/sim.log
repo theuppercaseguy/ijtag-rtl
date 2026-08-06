@@ -1,5 +1,5 @@
 # vsim -l sim.log -wlf sim.wlf ijtag_tb_opt 
-# Start time: 17:08:53 on Aug 05,2026
+# Start time: 14:11:36 on Aug 06,2026
 # Loading sv_std.std
 # Loading work.jtag_package(fast)
 # Loading work.jtag_defines_svh_unit(fast)
@@ -34,5 +34,5 @@
 #     (procedure "run" line 107)
 #     invoked from within
 # "run -all"
-# End time: 17:36:13 on Aug 05,2026, Elapsed time: 0:27:20
+# End time: 14:12:01 on Aug 06,2026, Elapsed time: 0:00:25
 # Errors: 1, Warnings: 0

@@ -40,7 +40,7 @@
 //------------------------------------------------------------------------------
 
 
-module IJTAG_top import jtag_package::*;#(
+module ijtag_top import jtag_package::*;#(
 		parameter IR_WIDTH 	   = jtag_package::IR_WIDTH,
 		parameter BSC_COUNT	   = jtag_package::BSC_COUNT,
 		parameter IDCODE_WIDTH = jtag_package::IDCODE_WIDTH
@@ -189,4 +189,4 @@ module IJTAG_top import jtag_package::*;#(
 			inf.tdo <= ijtag_tdo; //scan out
 	end 
 
-endmodule : IJTAG_top
+endmodule : ijtag_top

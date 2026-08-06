@@ -19,10 +19,8 @@
 # vmap work work 
 # Modifying modelsim.ini
 # QuestaSim-64 vlog 2024.1 Compiler 2024.02 Feb  1 2024
-# Start time: 17:08:52 on Aug 05,2026
+# Start time: 14:11:34 on Aug 06,2026
 # vlog -reportprogress 300 -mfcu -f ../rtl/file_list.f 
-# -- Compiling package jtag_package
-# ** Warning: ../rtl/jtag_interface.sv(53): (vlog-13233) Design unit "jtag_defines_svh_unit" already exists and will be overwritten. Design unit compiled with different set of options.
 # -- Compiling package jtag_defines_svh_unit
 # -- Importing package jtag_package
 # -- Compiling interface jtag_inf
@@ -34,16 +32,17 @@
 # -- Compiling module TDR
 # -- Compiling module sib
 # -- Compiling module ijtag_network
-# -- Compiling module IJTAG_top
+# -- Compiling module ijtag_top
 # -- Compiling module ijtag_tb_top
 # 
 # Top level modules:
+# 	ijtag_top
 # 	ijtag_tb_top
-# End time: 17:08:52 on Aug 05,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 1
+# End time: 14:11:35 on Aug 06,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
 # QuestaSim-64 vopt 2024.1 Compiler 2024.02 Feb  1 2024
 # ** Warning: (vopt-10587) Some optimizations are turned off because the +acc switch is in effect. This will cause your simulation to run slowly. Please use -access/-debug to maintain needed visibility.
-# Start time: 17:08:52 on Aug 05,2026
+# Start time: 14:11:35 on Aug 06,2026
 # vopt -reportprogress 300 ijtag_tb_top -o ijtag_tb_opt "+acc" 
 # 
 # Top level modules:
@@ -55,6 +54,7 @@
 # -- Loading module ijtag_tb_top
 # -- Loading interface jtag_inf
 # -- Loading module IJTAG_top
+# ** Warning: (vopt-13232) $unit scope 'jtag_defines_svh_unit' has changed since design unit 'IJTAG_top' was last compiled.
 # -- Loading module TAP_FSM
 # -- Loading module instr_shift_reg
 # -- Loading module instr_decoder
@@ -63,9 +63,8 @@
 # -- Loading module ijtag_network
 # -- Loading module sib
 # -- Loading module bsc
-# Incremental compilation check found no design-units (out of 15) may be reused.
-# Optimizing 15 design-units (inlining 0/28 module instances):
-# -- Optimizing package jtag_package(fast)
+# Incremental compilation check found 1 design-unit (out of 15) may be reused.
+# Optimizing 14 design-units (inlining 0/28 module instances):
 # -- Optimizing package jtag_defines_svh_unit(fast)
 # -- Optimizing module TDR(fast)
 # -- Optimizing module ijtag_network(fast)
@@ -75,12 +74,12 @@
 # ** Note: (vopt-143) Recognized 1 FSM in module "TAP_FSM(fast)".
 # -- Optimizing module instr_decoder(fast)
 # -- Optimizing module sib(fast)
-# -- Optimizing module shift_register(fast)
 # -- Optimizing module shift_register(fast__1)
+# -- Optimizing module shift_register(fast)
 # -- Optimizing module instr_shift_reg(fast)
 # -- Optimizing module bsc(fast)
 # -- Optimizing interface jtag_inf(fast__1)
 # -- Optimizing interface jtag_inf(fast)
 # Optimized design name is ijtag_tb_opt
-# End time: 17:08:53 on Aug 05,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 1
+# End time: 14:11:36 on Aug 06,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 2

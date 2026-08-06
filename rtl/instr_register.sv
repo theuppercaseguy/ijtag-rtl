@@ -33,21 +33,6 @@ module instr_shift_reg import jtag_package::*; #(
 	// SHIFT_IR   : Shift TDI into MSB, LSB exits through TDO
 	// UPDATE_IR  : Latch shifted instruction into IR hold register
 	//==================================================================
-	/*always_ff @(posedge tclk or negedge trst_n) begin
-	    if(!trst_n)begin
-			shift_reg   <= IR_DEFAULT_RST_VALUE;    	
-			ir_hold_reg <= IR_DEFAULT_RST_VALUE;    	
-		end
-	    else begin
-	      case(tap_fsm_curr_state)
-	        RST, CAP_IR :  shift_reg   <=  IR_DEFAULT_RST_VALUE; 	 		// Load rst/capture pattern
-	        SHIFT_IR    :  shift_reg   <=  {tdi,shift_reg[IR_WIDTH-1:1]}; 	// Shift right
-	        UPDATE_IR   :  ir_hold_reg <=  shift_reg;    					// Update active instruction
-	        default 	:  ; 											    // Hold current value
-	      endcase
-	    end
-	end*/
-
 	//------------------------------------------------------------
 	// Shift Register
 	//------------------------------------------------------------
